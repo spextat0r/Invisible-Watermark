@@ -14,11 +14,17 @@ Here is the text hidden in the second image.
 
 ![template](/assets/images/template.png)
 
+
 ## Requirements and Installation
 
-This project uses argparse and PIL to run
+This project uses argparse and PIL to run.
 
 ```
 python3 -m pip install argparse
 python3 -m pip install pillow
+```
+
+An example command is:
+```
+python3 Invisible-Watermark.py -i input_file.png -t Watermark_text -f 10 -w 20 -m 0
 ```
