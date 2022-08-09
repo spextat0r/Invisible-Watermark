@@ -25,7 +25,7 @@ python3 -m pip install pillow
 ```
 NOTE: This project requires a PNG or BMP file using RGB or RGBA formatting.
 
-NOTE: Adding a watermarked image to a Microsoft Word document and then saving it from the Word document WILL add noise to the image file that may damage the watermark.
+WARNING: Adding a watermarked image to a Microsoft Word document and then saving it from the Word document WILL add noise to the image file that may damage the watermark.
 
 An example command is:
 ```
