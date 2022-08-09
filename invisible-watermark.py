@@ -138,7 +138,6 @@ def main():
     parser.add_argument('-f', '--font-size', type=int, help='Font size (Default 30)', required=False)
     parser.add_argument('-w', '--watermark-num', type=int, help='Number of times to watermark the image (Default 10)', required=False)
     args = parser.parse_args()
-    print(args)
 
     #Checking and setting default values
     if args.font_size is None:
