@@ -23,6 +23,7 @@ This project uses argparse and PIL to run.
 python3 -m pip install argparse
 python3 -m pip install pillow
 ```
+NOTE: This project requires a PNG or BMP file using RGB or RGBA formatting.
 
 An example command is:
 ```
