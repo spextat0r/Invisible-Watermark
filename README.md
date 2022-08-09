@@ -8,8 +8,17 @@ Here is an example. Can you tell which is the original and which holds the water
 
 ![Original](/assets/images/dog-original-.png) ![Watermarked](/assets/images/dog-watermarked-.png)
 
-It's the second one that is watermarked but you would never know without being told.
+It's the second one that is watermarked, but you would never know without being told.
 
 Here is the text hidden in the second image.
 
 ![template](/assets/images/template.png)
+
+## Requirements and Installation
+
+This project uses argparse and PIL to run
+
+```
+python3 -m pip install argparse
+python3 -m pip install pillow
+```
