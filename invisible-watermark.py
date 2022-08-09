@@ -3,7 +3,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 from PIL import Image, ImageDraw, ImageFont
 
-
 def generate_template(original_img, text_to_add, path_to_image, font_size, num_of_watermarks):
 
     #Opening Image & Creating New Text Layer
@@ -123,9 +122,6 @@ def check_watermark(path_to_image):
 
     #save the watermark
     water_check.save('reterived_watermark_' + str(path_to_image))
-
-
-
 
 def main():
 
