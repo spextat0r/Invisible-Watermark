@@ -129,7 +129,7 @@ def main():
     parser = argparse.ArgumentParser(description='Image Watermarker\n\n#Requires an RGB or RGBA formatted PNG or BMP image', epilog="modes:\n  0 : Watermark\n  1 : Check Watermark", formatter_class=RawTextHelpFormatter)
     parser.add_argument('-i', '--input', help='Input file name', required=False)
     parser.add_argument('-iF', '--input-file', help='Input for multiple files in a text file', required=False)
-    parser.add_argument('-m', '--mode', choices=['0', '1'], help='Mode fore the script', required=True)
+    parser.add_argument('-m', '--mode', choices=['0', '1'], help='Mode for the script', required=True)
     parser.add_argument('-t', '--text', help='Watermark text', required=False)
     parser.add_argument('-f', '--font-size', type=int, help='Font size (Default 30)', required=False)
     parser.add_argument('-w', '--watermark-num', type=int, help='Number of times to watermark the image (Default 10)', required=False)
