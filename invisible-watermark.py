@@ -3,13 +3,26 @@ import argparse
 from argparse import RawTextHelpFormatter
 from PIL import Image, ImageDraw, ImageFont
 
-def generate_template(original_img, text_to_add, path_to_image, font_size, num_of_watermarks):
+def convert_to_png(image_to_convert):
+    print('Image {} is not in PNG format. Converting...'.format(image_to_convert))
+    try:  # ensure the image exists on disk
+        temp = Image.open(image_to_convert)
+        temp.save(image_to_convert + '.png')
+        image_to_convert = image_to_convert + '.png'
+
+    except FileNotFoundError as err:
+        print(err)
+        exit(1)
+
+    return image_to_convert
+
+def generate_template(original_img, text_to_add, path_to_image, font_size, num_of_watermarks, font_to_use):
 
     #Opening Image & Creating New Text Layer
     new_img = Image.new('RGB', original_img.size, (255, 255, 255))
 
     #Creating Text
-    font = ImageFont.truetype("arial.ttf", font_size)
+    font = ImageFont.truetype(font_to_use, font_size)
 
     #Creating Draw Object
     #this is what tells the draw tool which image to use
@@ -42,7 +55,7 @@ def generate_template(original_img, text_to_add, path_to_image, font_size, num_o
     new_img.save('template_' + path_to_image)
     return new_img
 
-def generate_watermark(path_to_image, text_to_add, font_size, num_of_watermarks):
+def generate_watermark(path_to_image, text_to_add, font_size, num_of_watermarks, custom_template, font):
     #read all the data from the image
     try: #ensure the image exists on disk
         original_img = Image.open(path_to_image)
@@ -59,8 +72,40 @@ def generate_watermark(path_to_image, text_to_add, font_size, num_of_watermarks)
     #get the size of the image
     width, height = original_img.size
 
+    if custom_template is not None: # did they give us a custom template
+        print('Using custom template: {}'.format(custom_template))
+        if custom_template.lower().endswith('.png') == False: # ensure its a png
+            custom_template = convert_to_png(custom_template)
+
+        try:  # ensure the image exists on disk
+            custom_template_image = Image.open(custom_template)
+
+        except FileNotFoundError as e:
+            print(e)
+            exit(1)
+
+        print("Image mode is: " + str(custom_template_image.mode) + " for " + custom_template)
+        if custom_template_image.mode != 'RGB':  # check to see if image is rgb
+            custom_template_image = custom_template_image.convert('RGB')
+            print("Image mode is NOW: " + str(custom_template_image.mode) + " for " + custom_template)
+
+        ct_width, ct_height = custom_template_image.size
+
+        if ct_width != width or ct_height != height: # ensure the template matches the original image
+            print('Custom template\'s width/height does not match that of the original image')
+            print('Custom Template Width/height\n{}/{}\nOriginal Image\'s Width/height\n{}/{}'.format(ct_width,ct_height, width, height))
+            tmp = Image.new('RGB', original_img.size, (255, 255, 255))
+            tmp.save('custom_template_' + path_to_image)
+            print('Generated a blank template that is the correct size')
+            exit(1)
+
+
+
     #generate the template to use
-    template = generate_template(original_img, text_to_add, path_to_image, font_size, num_of_watermarks)
+    if custom_template is not None:
+        template = custom_template_image
+    else:
+        template = generate_template(original_img, text_to_add, path_to_image, font_size, num_of_watermarks, font)
 
     #loop through each pixel checking the template for white or black pixels and
     #modifying the original_img to reflect those changes
@@ -89,6 +134,7 @@ def generate_watermark(path_to_image, text_to_add, font_size, num_of_watermarks)
             original_img.putpixel((col, row), (oi_r, oi_g , oi_b))
 
     original_img.save('download_' + str(path_to_image))
+    print('Successfully watermarked {}. Watermarked image is download_{}'.format(path_to_image, path_to_image))
 
 def check_watermark(path_to_image):
 
@@ -127,13 +173,34 @@ def main():
 
     #arguments
     parser = argparse.ArgumentParser(description='Image Watermarker\n\n#Requires an RGB or RGBA formatted PNG or BMP image', epilog="modes:\n  0 : Watermark\n  1 : Check Watermark", formatter_class=RawTextHelpFormatter)
-    parser.add_argument('-i', '--input', help='Input file name', required=False)
-    parser.add_argument('-iF', '--input-file', help='Input for multiple files in a text file', required=False)
-    parser.add_argument('-m', '--mode', choices=['0', '1'], help='Mode for the script', required=True)
-    parser.add_argument('-t', '--text', help='Watermark text', required=False)
-    parser.add_argument('-f', '--font-size', type=int, help='Font size (Default 30)', required=False)
-    parser.add_argument('-w', '--watermark-num', type=int, help='Number of times to watermark the image (Default 10)', required=False)
+    parser.add_argument('-i', '--input', action='store', help='Input file name to be watermarked', required=False)
+    parser.add_argument('-iF', '--input-file', action='store', help='Input for multiple files in a text file to be watermarked', required=False)
+    parser.add_argument('-ct', '--custom-template', action='store', help='Custom watermark template (MUST BE THE SAME SIZE AS THE IMAGE)', required=False)
+    parser.add_argument('-m', '--mode', action='store', choices=['0', '1'], help='Mode for the script', required=False)
+    parser.add_argument('-t', '--text', action='store', help='Watermark text', required=False)
+    parser.add_argument('-f', '--font-size', action='store', type=int, help='Font size (Default 30)', required=False)
+    parser.add_argument('--font', action='store', default='arial.ttf', help='Font to use (Default=arial.ttf)')
+    parser.add_argument('-w', '--watermark-num', action='store', type=int, help='Number of times to watermark the image (Default 10)', required=False)
+    parser.add_argument('--gen-blank-template', action='store_true', help='Generates a blank template for an image and exits')
     args = parser.parse_args()
+
+    if args.gen_blank_template:
+        if args.input is None:
+            print('Gotta give an image to make a blank template')
+            exit(1)
+        if args.input.lower().endswith('.png') == False:
+            args.input = convert_to_png(args.input)
+        print('Generating a blank template for {}'.format(args.input))
+        try:  # ensure the image exists on disk
+            temp = Image.open(args.input)
+            tmp = Image.new('RGB', temp.size, (255, 255, 255))
+            tmp.save('custom_template_' + args.input)
+
+        except FileNotFoundError as err:
+            print(err)
+            exit(1)
+
+        exit(0)
 
     #Checking and setting default values
     if args.font_size is None:
@@ -144,8 +211,10 @@ def main():
 
     if args.input is not None: #if the input exists
         if args.mode == '0': #if we are watermarking the image
-            if args.text is not None: #check to see if they supplied us text
-                generate_watermark(args.input, args.text, args.font_size, args.watermark_num)
+            if args.text is not None or args.custom_template is not None: #check to see if they supplied us text
+                if args.input.lower().endswith('.png') == False: # ensure the image is a png
+                    args.input = convert_to_png(args.input)
+                generate_watermark(args.input, args.text, args.font_size, args.watermark_num, args.custom_template, args.font)
 
             else:
                 print("Error: No watermark text supplied.")
@@ -153,6 +222,10 @@ def main():
 
         elif args.mode == '1': #if were just extracting the watermark
             check_watermark(args.input)
+
+        else:
+            print('Gotta enter a mode with -m')
+            exit(1)
 
     elif args.input_file is not None: #if we are doing multiple images
         items = []
@@ -167,8 +240,12 @@ def main():
             exit(1)
 
         if args.mode == '0': #if were watermarking images
-            if args.text is not None: #and we have text
+            if args.text is not None or args.custom_template is not None: #and we have text
                 for item in items: #loop through them
+                    if item.lower().endswith('.png') == False:
+                       item = convert_to_png(item)
+
+
                     generate_watermark(item.strip('\n'), args.text, args.font_size, args.watermark_num)
 
             else:
@@ -179,10 +256,13 @@ def main():
             for item in items: #loop through them
                 check_watermark(item.strip('\n'))
 
+        else:
+            print('Gotta enter a mode with -m')
+            exit(1)
+
     else: #no file :(
         print("Error: No file to watermark or check")
         exit(1)
 
 if __name__ == "__main__":
     main()
-
