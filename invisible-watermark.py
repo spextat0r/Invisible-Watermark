@@ -22,7 +22,12 @@ def generate_template(original_img, text_to_add, path_to_image, font_size, num_o
     new_img = Image.new('RGB', original_img.size, (255, 255, 255))
 
     #Creating Text
-    font = ImageFont.truetype(font_to_use, font_size)
+    try:
+        font = ImageFont.truetype(font_to_use, font_size)
+    except OSError as e:
+        print('[Font Error] {}'.format(e))
+        print('[Font Error] Font not found or it has an error')
+        exit(1)
 
     #Creating Draw Object
     #this is what tells the draw tool which image to use
