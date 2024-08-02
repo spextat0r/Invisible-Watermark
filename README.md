@@ -15,6 +15,9 @@ Here is the text hidden in the second image.
 ![template](/assets/images/template.png)
 
 
+## Custom Watermarks
+Custom watermarks must be the same width and height of the original image as well as being in black and white. This is because the tool only applies black pixels as being part of the watermark template.
+
 ## Requirements and Installation
 
 This project uses argparse and PIL to run.
