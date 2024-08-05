@@ -121,15 +121,15 @@ def generate_watermark(path_to_image, text_to_add, font_size, num_of_watermarks,
             r, g, b = template.getpixel((col, row)) #r g b is for the template image
             oi_r, oi_g, oi_b = original_img.getpixel((col, row)) #oi_r oi_g oi_b is for the original image
 
-            if r > 150: #logic tree if the r value is over 150 (closer to white than black) were making it a white pixel
-                if oi_r % 2 != 0: #check if the pixel is odd or even and if it is odd we need to add or subtract 1
+            if r > 150: #logic tree if the r value is over 150 (closer to black than white) were making it a black pixel
+                if oi_r % 2 == 0: #check if the pixel is odd or even and if it is odd we need to add or subtract 1
                     if oi_r + 1 > 255: #if adding 1 pushes over 255 (the max limit for rgb) subtract one
                         oi_r = oi_r - 1
                     else:
                         oi_r = oi_r + 1
 
-            else:
-                if oi_r % 2 == 0: #if the r value is even we need to make it odd by adding or subtracting 1
+            else: # make it a white pixel
+                if oi_r % 2 != 0: #if the r value is even we need to make it odd by adding or subtracting 1
                     if oi_r + 1 > 255: #if adding 1 pushes over 255 (the max limit for rgb) subtract one
                         oi_r = oi_r - 1
                     else:
@@ -168,7 +168,7 @@ def check_watermark(path_to_image):
         for col in range(width):
             r, g, b = original_img.getpixel((col, row)) #r g b is for the original_img
 
-            if r % 2 != 0: #check to see if the red pixel is odd (if it is add a black pixel to water_check)
+            if r % 2 == 0: #check to see if the red pixel is odd (if it is add a black pixel to water_check)
                 water_check.putpixel((col, row), (0, 0, 0))
 
     #save the watermark
